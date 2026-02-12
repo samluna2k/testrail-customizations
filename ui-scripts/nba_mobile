@@ -1,0 +1,64 @@
+name: Custom Suite Icons
+description: Replace suite folder icons with custom images
+author: Sam Luna
+version: 1.0
+includes: ^(suites|dashboard)
+
+js:
+$(document).ready(function() {
+	var SUITE_ICONS = {
+		'App Review Guidelines': 'https://cdn.jsdelivr.net/gh/samluna2k/testrail-customizations@main/asc.png',
+		'MyNBA 2K Companion App': 'https://cdn.jsdelivr.net/gh/samluna2k/testrail-customizations@main/mynba.png',
+		'NBA 2K24 MyTEAM Mobile': 'https://cdn.jsdelivr.net/gh/samluna2k/testrail-customizations@main/mtm24.png',
+		'NBA 2K25 MyTEAM Mobile': 'https://cdn.jsdelivr.net/gh/samluna2k/testrail-customizations@main/mtm25.png',
+		'NBA 2K26 MyTEAM Mobile': 'https://cdn.jsdelivr.net/gh/samluna2k/testrail-customizations@main/mtm26.png'
+	};
+
+	function normalize(value) {
+		return $.trim((value || '').replace(/\s+/g, ' '));
+	}
+
+	function applySuiteIcons() {
+		$('a[href*="suites/view/"], a[href*="suites/edit/"], .sidebar a[href*="suites/"]').each(function() {
+			var $link = $(this);
+			var suiteName = normalize($link.clone().children().remove().end().text());
+			var iconUrl = SUITE_ICONS[suiteName];
+			if (!iconUrl) {
+				return;
+			}
+
+			var $container = $link.closest('tr, li, .item, .row');
+			if (!$container.length) {
+				$container = $link.parent();
+			}
+
+			$container.find('span.icon, i.icon, [class*="icon-suite"], [class*="icon-folder"], [class*="folder"]').first().addClass('suite-icon-hidden');
+
+			var $custom = $link.find('.custom-suite-icon').first();
+			if (!$custom.length) {
+				$custom = $('<span class="custom-suite-icon" aria-hidden="true"></span>');
+				$link.prepend($custom);
+			}
+			$custom.css('background-image', 'url("' + iconUrl + '")');
+		});
+	}
+
+	applySuiteIcons();
+	new MutationObserver(applySuiteIcons).observe(document.body, { childList: true, subtree: true });
+});
+
+css:
+.custom-suite-icon {
+	display: inline-block;
+	width: 25px;
+	height: 25px;
+	margin-right: 6px;
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-size: contain;
+	vertical-align: text-bottom;
+}
+
+.suite-icon-hidden {
+	display: none !important;
+}
